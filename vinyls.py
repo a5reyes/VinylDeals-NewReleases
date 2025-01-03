@@ -4,8 +4,7 @@ import string
 
 reddit = praw.Reddit(
     client_id="...",
-    client_secret="...",
-    user_agent="vinyldealsbot v1.0 by /u/vinyldealsbot"
+    client_secret="..."
 )
 
 #misc. intro
