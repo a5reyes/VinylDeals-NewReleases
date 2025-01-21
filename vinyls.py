@@ -50,10 +50,10 @@ def return_res(records, sub):
             else:
                 results.append("- {} - {}".format(title, des[0]))
         if sub == "deals":
-            if not "amazon" in des[0]:
-                results.append("- {} - {}".format(title, des[1]))
-            else:
+            if "amazon" in des[0] or "a.co" in des[0]:
                 results.append("- {} - {}".format(title, des[0]))
+            else:
+                results.append("- {} - {}".format(title, des[1]))
     return [result for result in results]
 
 #sorting choices - by price (ascending or descending)
