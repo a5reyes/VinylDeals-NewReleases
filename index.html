@@ -16,7 +16,7 @@
             font: sans-serif;
         }
         h1 {
-            font-size: 24px;
+            font-size: 28px;
         }
         .p1 {
             font-style: italic;
@@ -48,11 +48,11 @@
             overflow-wrap: break-word;
         }
         .results a {
-            color: blue;
-            text-decoration: underline;
+            color: blue; 
+            text-decoration: underline; 
         }
         .results a:hover {
-            color: darkblue;
+            color: darkblue; 
         }
         @media screen and (max-width: 800px) {
           .left, .right {
@@ -75,14 +75,15 @@
             <option value="20">20</option>
             <option value="50">50</option>
             <option value="100">100</option>
+            <option value="200">200</option>
         </select>
         <br><p></p>
         <select name="dropdown-sort" id="dropdown-sort">
             <option value="">--Choose - sort by --</option>
             <option value="price-low">Price - ascending</option>
-            <option value="price-high">Price - descending</option>
+            <option value="price-high">Price - descending</option>                
             <option value="lps">Double Lps or More</option>
-            <option value="size">7 inch, 10 inch</option>
+            <option value="size">7 inch, 10 inch, etc.</option>
         </select>
         <button type="submit" name="deals">Submit</button>
     </form>
