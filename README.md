@@ -11,4 +11,4 @@ price, number of lps, size of lp(10", 12", 7")
 
 -set limit to amount of releases or deals you want to see
 
-update 1/20/25 - now removes expired vinyl deals, added buttons for links
+update 1/20/25 - now removes expired vinyl deals, added buttons for links, added my amazon affiliate sitestripe tag to amazon deals
