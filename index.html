@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinyl Deals and New Releases</title>
+    <style>
+        textarea {
+            position: absolute;
+            margin-left: 5%;
+            max-width: calc(100% - 20px);
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        title {
+            font: sans-serif;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        .p1 {
+            font-style: italic;
+            word-break: break-word;
+            white-space: normal;
+            max-width: calc(100% - 20px);
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        .split {
+            height: 100%;
+            width: 50%;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+        .left {
+            left: 0;
+            margin-left: 5%;
+        }
+        .right {
+            right: 0;
+            border: 3px solid #73AD21;
+        }
+        .results{
+            margin-left: 5%;
+            overflow-wrap: break-word;
+        }
+        .results a {
+            color: blue;
+            text-decoration: underline;
+        }
+        .results a:hover {
+            color: darkblue;
+        }
+        @media screen and (max-width: 800px) {
+          .left, .right {
+            display: block;
+            margin-bottom: 20px;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="split left">
+    <div><h1 class="h1">Vinyl Deals and New Releases</h1>
+    <p class="p1">Get great vinyl deals or check out new releases!</p>
+    </div>
+    <!--deals-->
+    <form method="post" name="deals">
+        <label for="deal">- deals - </label>
+        <select name="dropdown-limit" id="dropdown-limit">
+            <option value="">--Choose - limit --</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+        <br><p></p>
+        <select name="dropdown-sort" id="dropdown-sort">
+            <option value="">--Choose - sort by --</option>
+            <option value="price-low">Price - ascending</option>
+            <option value="price-high">Price - descending</option>
+            <option value="lps">Double Lps or More</option>
+            <option value="size">7 inch, 10 inch</option>
+        </select>
+        <button type="submit" name="deals">Submit</button>
+    </form>
+    <!--releases-->
+    <form method="post" name="release">
+        <p>- new releases</p>
+        <select name="dropdown-limit" id="dropdown-limit">
+            <option value="">--Choose - limit --</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+        </select>
+        <button type="submit" name="releases">Submit</button>
+    </form>
+    <div class="split right"><br>
+        <div class="results"><p style="font-weight: bold;">Vinyls</p>
+            {% for result in results %}
+                <div rows="25" cols="75" >{{ result|get_link|safe }}</div><br>
+            {% endfor %}
+        </div>
+        <br><p></p>
+    </div>
+    <br>
+</body>
+</html>
