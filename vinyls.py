@@ -40,7 +40,7 @@ def get_reddit(category, str_limit):
             posts.update({post.title : [direct_link[0], post.url]})
         else:
             posts.update({post.title : [post.selftext, post.url]}) 
-        #checking if post is expired
+        #checking if deal is expired
         if subreddit == "VinylDeals":
             post_id = post.id
             submission = reddit.submission(id=post_id)
