@@ -31,28 +31,13 @@ def get_reddit(category, str_limit):
             links = link[1].replace("(", "").replace(")", "").replace("]", "")
             direct_link = re.split(r"[*[]", links)
             posts.update({post.title : [direct_link[0], post.url]}) #post.selftext for description w/ directlink
-        else:
-            posts.update({post.title : [post.selftext, post.url]}) #post.selftext for description
-        if "Direct" in post.selftext:
+        elif "Direct" in post.selftext:
             link = post.selftext.split("Direct")
             links = link[1].replace("(", "").replace(")", "").replace("]", "")
             direct_link = re.split(r"[*[]", links)
             posts.update({post.title : [direct_link[0], post.url]})
         else:
-            posts.update({post.title : [post.selftext, post.url]}) 
-        #checking if deal is expired
-        if subreddit == "VinylDeals":
-            post_id = post.id
-            submission = reddit.submission(id=post_id)
-            submission.comments.replace_more(limit=1)
-            is_expired = False
-            for comment in submission.comments.list():
-                if "expired" in comment.body.casefold():
-                    is_expired = True
-                    expired_posts[post.title] = [direct_link[0], post.url] 
-                    break
-            if is_expired and post.title in posts:
-                del posts[post.title]
+            posts.update({post.title : [post.selftext, post.url]}) #post.selftext for description
     return posts
 
 #formatting results from chosen subreddit
@@ -65,7 +50,7 @@ def return_res(records, sub):
             else:
                 results.append("- {} - {}".format(title, des[0]))
         if sub == "deals":
-            if des[0] == "" or not des[0].startswith("https"):
+            if not "amazon" in des[0]:
                 results.append("- {} - {}".format(title, des[1]))
             else:
                 results.append("- {} - {}".format(title, des[0]))
@@ -73,28 +58,27 @@ def return_res(records, sub):
 
 #sorting choices - by price (ascending or descending)
 def sort_prices(vinyls, order):
-    deals_prices = []
+    deals_prices = {}
+    sorted_deals = {}
     for post in vinyls.keys():
         post_str = str(post)
         if "$" in post_str:
-            try:
-                title, cost = post_str.split("$")
-            except (ValueError):
-                etc, title, cost = post_str.split("$")
+            cost = post_str.split("$")[-1]
             value = cost.split(" ")
             deal = float(value[0].rstrip(string.punctuation))
-            if deal not in deals_prices:
-                deals_prices.append(deal)
+            deals_prices.update({post_str: deal})
         else:
             del post
     if order == "descending":
-        deals_prices.sort(reverse=True)
+        for key in sorted(deals_prices, key=deals_prices.get, reverse=True):
+            sorted_deals[key] = deals_prices[key]
     else:
-        deals_prices.sort()
+        for key in sorted(deals_prices, key=deals_prices.get):
+            sorted_deals[key] = deals_prices[key]
     results = []
-    for deal in deals_prices:
+    for item, deal in sorted_deals.items():
         for post in vinyls.keys():
-            if str(deal) in post:
+            if item in post and str(deal) in post:
                 ref = vinyls.get(post)
                 if ref[0] == "":
                     results.append("- {} - {}".format(post, ref[1]))
