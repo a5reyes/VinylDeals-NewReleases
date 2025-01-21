@@ -8,6 +8,8 @@ def get_link(res):
     results = str(res)
     info = results.split(" - ")
     artist = info[0]
+    if not artist.startswith("- [Amazon]"):
+        artist = info[1]
     url_pattern = r'(https?://[^\s]+)'
     if "www.amazon" in res or "a.co" in res:
         tag = "..."
