@@ -21,7 +21,6 @@ def get_reddit(category, str_limit):
         sub = "VinylReleases"
     subreddit = reddit.subreddit(sub)
     posts = {}
-    expired_posts = {}
     num_limit = int(str_limit)
     for post in subreddit.new(limit=num_limit):
         if "Guidelines" in post.title or "Discussion" in post.title:
@@ -63,10 +62,16 @@ def sort_prices(vinyls, order):
     for post in vinyls.keys():
         post_str = str(post)
         if "$" in post_str:
-            cost = post_str.split("$")[-1]
-            value = cost.split(" ")
-            deal = float(value[0].rstrip(string.punctuation))
-            deals_prices.update({post_str: deal})
+            if ("$" in post_str and post_str.count("$") >= 2):
+                cost = post_str.split("$")[1]
+                value = cost.split(" ")
+                deal = float(value[0].rstrip(string.punctuation))
+                deals_prices.update({post_str: deal})
+            else:
+                cost = post_str.split("$")[-1]
+                value = cost.split(" ")
+                deal = float(value[0].rstrip(string.punctuation))
+                deals_prices.update({post_str: deal})
         else:
             del post
     if order == "descending":
