@@ -1,16 +1,24 @@
 from flask import Flask, request, render_template
 import vinyls
 import re
+from string import punctuation
 
 app = Flask(__name__)
 
 def get_link(res):
+    url_pattern = r'(https?://[^\s]+)'
     results = str(res)
+    #removing duplicate of direct link
+    if ("www.amazon" in results and results.count("www.amazon") >= 2):
+        links = re.split(url_pattern, res)
+        res = links[1].split("(")[-1].strip(punctuation)
+    if ("a.co" in results and results.count("a.co") >= 2):
+        links = re.split(url_pattern, res)
+        res = links[1].split("(")[-1].strip(punctuation)
     info = results.split(" - ")
     artist = info[0]
     if not artist.startswith("- [Amazon]"):
         artist = info[1]
-    url_pattern = r'(https?://[^\s]+)'
     if "www.amazon" in res or "a.co" in res:
         tag = "..."
         return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<button>' + artist  + '</button>' + '</a>', res)
