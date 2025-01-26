@@ -21,7 +21,20 @@ def get_reddit(category, str_limit):
         sub = "VinylReleases"
     subreddit = reddit.subreddit(sub)
     posts = {}
+    expired_posts = []
     num_limit = int(str_limit)
+    for post in subreddit.new(limit=num_limit): #checking for expired posts
+        if subreddit == "VinylDeals":
+            post_id = post.id
+            submission = reddit.submission(id=post_id)
+            submission.comments.replace_more(limit=1)
+            for comment in submission.comments.list():
+                if "expired" in comment.body.casefold():
+                    num_limit += 1
+                    expired_posts.append(post.title) 
+                    break
+                else:
+                    continue
     for post in subreddit.new(limit=num_limit):
         if "Guidelines" in post.title or "Discussion" in post.title:
             continue
@@ -29,14 +42,17 @@ def get_reddit(category, str_limit):
             link = post.selftext.split("direct")
             links = link[1].replace("(", "").replace(")", "").replace("]", "")
             direct_link = re.split(r"[*[]", links)
-            posts.update({post.title : [direct_link[0], post.url]}) #post.selftext for description w/ directlink
+            if post.title not in expired_posts:
+                posts.update({post.title : [direct_link[0], post.url]}) #post.selftext for description w/ directlink
         elif "Direct" in post.selftext:
             link = post.selftext.split("Direct")
             links = link[1].replace("(", "").replace(")", "").replace("]", "")
             direct_link = re.split(r"[*[]", links)
-            posts.update({post.title : [direct_link[0], post.url]})
+            if post.title not in expired_posts:
+                posts.update({post.title : [direct_link[0], post.url]})
         else:
-            posts.update({post.title : [post.selftext, post.url]}) #post.selftext for description
+            if post.title not in expired_posts:
+                posts.update({post.title : [post.selftext, post.url]}) #post.selftext for description
     return posts
 
 #formatting results from chosen subreddit
@@ -49,10 +65,13 @@ def return_res(records, sub):
             else:
                 results.append("- {} - {}".format(title, des[0]))
         if sub == "deals":
-            if "amazon" in des[0] or "a.co" in des[0]:
+            if "amazon" in des[0] or "a.co" in des[0]:#or not "reddit" in des[0]
                 results.append("- {} - {}".format(title, des[0]))
             else:
-                results.append("- {} - {}".format(title, des[1]))
+                if "reddit" in des[1] or str(des[0]).startswith("https"):
+                    results.append("- {} - {}".format(title, des[0]))
+                else:
+                    results.append("- {} - {}".format(title, des[1]))
     return [result for result in results]
 
 #sorting choices - by price (ascending or descending)
