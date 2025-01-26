@@ -1,10 +1,38 @@
-from flask import Flask, request, render_template
-import vinyls
+from flask import Flask, request, render_template, make_response
+import vinyls as vinyls
 import re
 from string import punctuation
+import requests
 
 app = Flask(__name__)
 
+def cover_art(item, artist):
+    def itunes_search(item):
+        url = "https://itunes.apple.com/search"
+        release = item + ' - ' + artist
+        params = {
+            'term': release,
+            'limit': 5,
+            'media': 'music'
+        }
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            return data['results']
+        else:
+            return None
+    results = itunes_search(item)
+    if results:
+        for result in results:
+            item_artist = result.get('artistName', '')
+            item_name = result.get('collectionName', '')
+            cover = result.get('artworkUrl100', '')
+            if item_artist.casefold() == artist.casefold() and item_name.casefold() == item.casefold():
+                return cover    
+        return cover
+    else:
+        return None  
+    
 def get_link(res):
     url_pattern = r'(https?://[^\s]+)'
     results = str(res)
@@ -16,17 +44,47 @@ def get_link(res):
         links = re.split(url_pattern, res)
         res = links[1].split("(")[-1].strip(punctuation)
     info = results.split(" - ")
+    if " – " in results:
+        info = results.split(" – ")
     artist = info[0]
     if not artist.startswith("- [Amazon]"):
         artist = info[1]
-    if "www.amazon" in res or "a.co" in res:
-        tag = "..."
-        return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<button>' + artist  + '</button>' + '</a>', res)
-    else:
-        return re.sub(url_pattern, r'<a href="\1" target="_blank">' + '<button>' + artist + '</button> </a>', res)
+    if "deals" in request.form:
+        arr = ["[", "$", "(", "]", ")"]
+        if artist.startswith("- [Amazon]"):
+            get_artist_name = artist.split("- [Amazon]")
+            artist_name = get_artist_name[1].strip()
+            pattern = '|'.join(map(re.escape, arr))
+            release_name = re.split(pattern, info[1])
+            album = release_name[0].strip()
+            cover_url = cover_art(album, artist_name)
+        else:
+            artist_name = artist
+            pattern = '|'.join(map(re.escape, arr))
+            release_name = re.split(pattern, info[1])
+            album = release_name[0].strip()
+            cover_url = cover_art(album, artist_name)
+        if "www.amazon" in res or "a.co" in res:
+            tag = "..."
+            if cover_url is None:
+                return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<button>' + artist  + '</button>' + '</a>', res)
+            else:   
+                return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<img src="' + cover_url + '" alt="None">' + '</img>' + '</a>', res)
+        else:
+            if len(artist) > 30:
+                artist = "Click here"
+            return re.sub(url_pattern, r'<a href="\1"' + 'target="_blank">' + '<button>' + artist + '</button> </a>', res.rstrip(punctuation))
+    else: #if "releases" in request.form  
+        if len(artist) > 120:
+                artist = "Click here"  
+        if "www.amazon" in res or "a.co" in res:
+            tag = "..."
+            return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<button>' + artist  + '</button>' + '</a>', res)
+        else:
+            return re.sub(url_pattern, r'<a href="\1"' + 'target="_blank">' + '<button>' + artist + '</button> </a>', res)
 
 app.jinja_env.filters['get_link'] = get_link
-
+    
 @app.route("/", methods=["POST", "GET"])
 def home():
     if request.method == "GET":
