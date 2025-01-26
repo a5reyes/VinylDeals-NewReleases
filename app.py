@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, make_response
+from flask import Flask, request, render_template
 import vinyls as vinyls
 import re
 from string import punctuation
