@@ -16,7 +16,7 @@
             font: sans-serif;
         }
         h1 {
-            font-size: 28px;
+            font-size: 24px;
         }
         .p1 {
             font-style: italic;
@@ -37,7 +37,7 @@
         }
         .left {
             left: 0;
-            margin-left: 5%;
+            padding-left: 5%;
         }
         .right {
             right: 0;
@@ -47,12 +47,17 @@
             margin-left: 5%;
             overflow-wrap: break-word;
         }
-        .results a {
-            color: blue; 
-            text-decoration: underline; 
+        .result-row {
+            padding: 10px;
+            background-color: rgb(248, 245, 245);
+            border: 3px solid gray;
         }
-        .results a:hover {
-            color: darkblue; 
+        .result-row:hover {
+            background-color: lightgray;
+        }
+        a {
+            display: block; 
+            text-align: right;
         }
         @media screen and (max-width: 800px) {
           .left, .right {
@@ -75,7 +80,6 @@
             <option value="20">20</option>
             <option value="50">50</option>
             <option value="100">100</option>
-            <option value="200">200</option>
         </select>
         <br><p></p>
         <select name="dropdown-sort" id="dropdown-sort">
@@ -84,7 +88,7 @@
             <option value="price-high">Price - descending</option>                
             <option value="lps">Double Lps or More</option>
             <option value="size">7 inch, 10 inch, etc.</option>
-        </select>
+        </select><br><br>
         <button type="submit" name="deals">Submit</button>
     </form>
     <!--releases-->
@@ -96,13 +100,13 @@
             <option value="50">50</option>
             <option value="100">100</option>
             <option value="200">200</option>
-        </select>
+        </select><br><br>
         <button type="submit" name="releases">Submit</button>
     </form>
     <div class="split right"><br>
         <div class="results"><p style="font-weight: bold;">Vinyls</p>
             {% for result in results %}
-                <div rows="25" cols="75" >{{ result|get_link|safe }}</div><br>
+                <div class="result-row">{{ result|get_link|safe }}</div><br>
             {% endfor %}
         </div>
         <br><p></p>
