@@ -34,9 +34,12 @@ def cover_art(item, artist):
         return None  
     
 def get_link(res):
-    url_pattern = r'(https?://[^\s]+)'
+    url_pattern = r'(https?://[^\s]+|www\.[^\s]+)'
     results = str(res)
-    #removing duplicate of direct link
+    links = re.findall(url_pattern, res)
+    for link in links:
+        if link.startswith("www."):
+            res = res.replace("www.", "https://")
     if ("www.amazon" in results and results.count("www.amazon") >= 2):
         links = re.split(url_pattern, res)
         res = links[1].split("(")[-1].strip(punctuation)
@@ -62,7 +65,10 @@ def get_link(res):
             artist_name = artist
             pattern = '|'.join(map(re.escape, arr))
             release_name = re.split(pattern, info[1])
-            album = release_name[0].strip()
+            if release_name[0] == "":
+                album = release_name[1].strip()
+            else:
+                album = release_name[0].strip()
             cover_url = cover_art(album, artist_name)
         if "www.amazon" in res or "a.co" in res:
             tag = "..."
@@ -73,15 +79,25 @@ def get_link(res):
         else:
             if len(artist) > 30:
                 artist = "Click here"
-            return re.sub(url_pattern, r'<a href="\1"' + 'target="_blank">' + '<button>' + artist + '</button> </a>', res.rstrip(punctuation))
+            try:
+                links = re.split(url_pattern, res)
+                link = links[1].split("(")[-1].strip(punctuation)
+                return re.sub(url_pattern, r'<a href='+ link + ' ' + 'target="_blank">' + '<button>' + artist + '</button> </a>', res)
+            except:
+                return re.sub(url_pattern, r'<a href="\1" target="_blank">' + '<button>' + artist + '</button> </a>', res)
     else: #if "releases" in request.form  
-        if len(artist) > 120:
+        if len(artist) > 100:
                 artist = "Click here"  
         if "www.amazon" in res or "a.co" in res:
             tag = "..."
             return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<button>' + artist  + '</button>' + '</a>', res)
         else:
-            return re.sub(url_pattern, r'<a href="\1"' + 'target="_blank">' + '<button>' + artist + '</button> </a>', res)
+            try:
+                links = re.split(url_pattern, res)
+                link = links[1].split("(")[-1].strip(punctuation)
+                return re.sub(url_pattern, r'<a href='+ link + ' ' + 'target="_blank">' + '<button>' + artist + '</button> </a>', res)
+            except:
+                return re.sub(url_pattern, r'<a href="\1" target="_blank">' + '<button>' + artist + '</button> </a>', res)
 
 app.jinja_env.filters['get_link'] = get_link
     
