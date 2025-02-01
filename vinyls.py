@@ -1,6 +1,7 @@
 import praw
 import re
-import string
+from string import punctuation
+import requests
 
 reddit = praw.Reddit(
     client_id="...",
@@ -23,18 +24,12 @@ def get_reddit(category, str_limit):
     posts = {}
     expired_posts = []
     num_limit = int(str_limit)
-    for post in subreddit.new(limit=num_limit): #checking for expired posts
+    for post in subreddit.new(limit=num_limit):
         if subreddit == "VinylDeals":
-            post_id = post.id
-            submission = reddit.submission(id=post_id)
-            submission.comments.replace_more(limit=1)
-            for comment in submission.comments.list():
-                if "expired" in comment.body.casefold():
-                    num_limit += 1
-                    expired_posts.append(post.title) 
-                    break
-                else:
-                    continue
+            if post.link_flair_text == "EXPIRED" or post.link_flair_text == "OTHER":
+                expired_posts.append(post.title)
+                num_limit += 1        
+                continue      
     for post in subreddit.new(limit=num_limit):
         if "Guidelines" in post.title or "Discussion" in post.title:
             continue
@@ -60,15 +55,18 @@ def return_res(records, sub):
     results = []
     for title, des in records.items():
         if sub == "releases":
-            if des[0] == "" or not des[0].startswith("https"):
+            if des[0] == "" or not is_url_valid(des[0]):
                 results.append("- {} - {}".format(title, des[1]))
             else:
-                results.append("- {} - {}".format(title, des[0]))
+                if is_url_valid(des[0]):
+                    results.append("- {} - {}".format(title, des[0]))
+                else:
+                    results.append("- {} - {}".format(title, des[1]))
         if sub == "deals":
             if "amazon" in des[0] or "a.co" in des[0]:#or not "reddit" in des[0]
                 results.append("- {} - {}".format(title, des[0]))
             else:
-                if "reddit" in des[1] or str(des[0]).startswith("https"):
+                if "reddit" in des[1] or is_url_valid(des[0]):
                     results.append("- {} - {}".format(title, des[0]))
                 else:
                     results.append("- {} - {}".format(title, des[1]))
@@ -84,12 +82,12 @@ def sort_prices(vinyls, order):
             if ("$" in post_str and post_str.count("$") >= 2):
                 cost = post_str.split("$")[1]
                 value = cost.split(" ")
-                deal = float(value[0].rstrip(string.punctuation))
+                deal = float(value[0].rstrip(punctuation))
                 deals_prices.update({post_str: deal})
             else:
                 cost = post_str.split("$")[-1]
                 value = cost.split(" ")
-                deal = float(value[0].rstrip(string.punctuation))
+                deal = float(value[0].rstrip(punctuation))
                 deals_prices.update({post_str: deal})
         else:
             del post
@@ -134,6 +132,13 @@ def size_vinyl(vinyls):
         if any(size in release[0] for size in vinyl_sizes):
             results.append("- {} - {}".format(release[0], release[1][0]))
     return [result for result in results]
+
+def is_url_valid(url):
+    try:
+        response = requests.head(url, allow_redirects=True, timeout=5)
+        return response.status_code < 400
+    except requests.exceptions.RequestException:
+        return False
 
 if __name__ == "__main__":
     main()
