@@ -28,18 +28,19 @@ def cover_art(item, artist):
             item_name = result.get('collectionName', '')
             cover = result.get('artworkUrl100', '')
             if item_artist.casefold() == artist.casefold() and item_name.casefold() == item.casefold():
-                return cover    
+                return cover
         return cover
     else:
-        return None  
-    
+        return None
+
 def get_link(res):
     url_pattern = r'(https?://[^\s]+|www\.[^\s]+)'
     results = str(res)
     links = re.findall(url_pattern, res)
     for link in links:
         if link.startswith("www."):
-            res = res.replace("www.", "https://")
+            res = res.replace("www.", "")
+    #removing duplicate of direct link
     if ("www.amazon" in results and results.count("www.amazon") >= 2):
         links = re.split(url_pattern, res)
         res = links[1].split("(")[-1].strip(punctuation)
@@ -74,7 +75,7 @@ def get_link(res):
             tag = "..."
             if cover_url is None:
                 return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<button>' + artist  + '</button>' + '</a>', res)
-            else:   
+            else:
                 return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<img src="' + cover_url + '" alt="None">' + '</img>' + '</a>', res)
         else:
             if len(artist) > 30:
@@ -85,9 +86,9 @@ def get_link(res):
                 return re.sub(url_pattern, r'<a href='+ link + ' ' + 'target="_blank">' + '<button>' + artist + '</button> </a>', res)
             except:
                 return re.sub(url_pattern, r'<a href="\1" target="_blank">' + '<button>' + artist + '</button> </a>', res)
-    else: #if "releases" in request.form  
+    else: #if "releases" in request.form
         if len(artist) > 100:
-                artist = "Click here"  
+                artist = "Click here"
         if "www.amazon" in res or "a.co" in res:
             tag = "..."
             return re.sub(url_pattern, r'<a href="\1' + tag + '" target="_blank">' + '<button>' + artist  + '</button>' + '</a>', res)
@@ -100,7 +101,7 @@ def get_link(res):
                 return re.sub(url_pattern, r'<a href="\1" target="_blank">' + '<button>' + artist + '</button> </a>', res)
 
 app.jinja_env.filters['get_link'] = get_link
-    
+
 @app.route("/", methods=["POST", "GET"])
 def home():
     if request.method == "GET":
